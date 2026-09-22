@@ -16,6 +16,8 @@ coverage/
 Thumbs.db
 *.log
 .codex-log/
+.vercel/
+*.tsbuildinfo
 
 # Project planning and implementation documentation (keep local only)
 docs/
