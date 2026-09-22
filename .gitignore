@@ -1,0 +1,26 @@
+# Dependencies and build output
+node_modules/
+.next/
+out/
+coverage/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local tooling and logs
+.DS_Store
+Thumbs.db
+*.log
+.codex-log/
+
+# Project planning and implementation documentation (keep local only)
+docs/
+PROJECT_QUESTIONNAIRE.md
+PROJECT_ANALYSIS.md
+PROJECT_RESPONSE_ANALYSIS.md
+REQUIREMENTS.md
+.txt
