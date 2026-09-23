@@ -11,6 +11,7 @@
 - Admin Console quản lý bộ tranh và bộ câu hỏi.
 - Supabase Auth, schema, RLS, Storage và mã hóa văn bản trước khi lưu.
 - Đăng ký/đăng nhập bằng email và mật khẩu; tên hiển thị được lưu trong hồ sơ.
+- Nhạc nền toàn ứng dụng, phát lặp ở âm lượng 50% sau tương tác đầu tiên và có nút bật/tắt.
 - Demo local chạy không cần tài khoản/key.
 
 ## 1. Chạy local ngay
@@ -71,7 +72,7 @@ Tạo API key trong Google AI Studio và điền:
 
 ```text
 GEMINI_API_KEY=YOUR_GEMINI_KEY
-GEMINI_MODEL=gemini-3.8-flash
+GEMINI_MODEL=gemini-3.5-flash
 ```
 
 Model là biến cấu hình để có thể thay đổi mà không sửa code. API chỉ được gọi tại server route `/api/analyze`.

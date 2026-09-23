@@ -26,3 +26,6 @@ PROJECT_ANALYSIS.md
 PROJECT_RESPONSE_ANALYSIS.md
 REQUIREMENTS.md
 .txt
+
+# Local source media (the optimized web copy lives in public/audio)
+/back-ground-music.mp3

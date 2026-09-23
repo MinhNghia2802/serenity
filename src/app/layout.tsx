@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import AuthNavigation from "@/components/AuthNavigation";
+import BackgroundMusic from "@/components/BackgroundMusic";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </div>
         </header>
         {children}
+        <BackgroundMusic />
       </body>
     </html>
   );
