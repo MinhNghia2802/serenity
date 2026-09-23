@@ -39,7 +39,7 @@ export async function analyzeWithGemini(input: AnalyzeRequest): Promise<GeminiAn
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return localTextAnalysis(input);
 
-  const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+  const model = process.env.GEMINI_MODEL || "gemini-3.5-flash";
   const prompt = `Bạn là bộ phân tích cảm xúc tiếng Việt cho ứng dụng wellbeing, không phải bác sĩ.
 Không chẩn đoán bệnh lý. Dùng ngôn ngữ không chắc chắn, đồng cảm, không phán xét.
 Mô tả tranh và chia sẻ tự do là tín hiệu chính. Câu chọn nhanh chỉ là ngữ cảnh kiểm tra chéo.
@@ -65,7 +65,7 @@ Nếu có dấu hiệu tự làm hại/nguy cơ tức thời, safetyLevel phải
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema,
-        temperature: 0.25,
+        thinkingConfig: { thinkingLevel: "low" },
       },
     }),
   };
@@ -73,7 +73,7 @@ Nếu có dấu hiệu tự làm hại/nguy cơ tức thời, safetyLevel phải
   let response: Response | null = null;
   for (let attempt = 0; attempt <= retryDelaysMs.length; attempt += 1) {
     try {
-      response = await fetch(url, { ...request, signal: AbortSignal.timeout(20000) });
+      response = await fetch(url, { ...request, signal: AbortSignal.timeout(45000) });
     } catch {
       if (attempt === retryDelaysMs.length) throw new GeminiRequestError(503);
       await wait(retryDelaysMs[attempt]);
