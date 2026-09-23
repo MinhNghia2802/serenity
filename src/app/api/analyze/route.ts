@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { analyzeWithGemini } from "@/lib/ai/gemini";
+import { analyzeWithGemini, GeminiRequestError } from "@/lib/ai/gemini";
 import { getDemoRecommendations } from "@/lib/content/demo";
 import { calculateFinalScores, topEmotion } from "@/lib/emotion/scoring";
 import { highestSafetyLevel, screenSafety } from "@/lib/safety/screen";
@@ -101,6 +101,9 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
     });
   } catch (error) {
+    if (error instanceof GeminiRequestError) {
+      return NextResponse.json({ error: error.message, retryable: true }, { status: error.status === 429 ? 429 : 503 });
+    }
     const message = error instanceof Error ? error.message : "Không thể phân tích lúc này";
     return NextResponse.json({ error: message }, { status: 400 });
   }

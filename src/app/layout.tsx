@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
+import AuthNavigation from "@/components/AuthNavigation";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,12 +16,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <header className="site-header">
           <div className="container site-header__inner">
             <Link className="brand" href="/">serenity.</Link>
-            <nav className="nav" aria-label="Điều hướng chính">
-              <Link href="/dashboard">Tổng quan</Link>
-              <Link href="/history">Lịch sử</Link>
-              <Link href="/settings">Cài đặt</Link>
-              <Link className="button" href="/check-in">Check-in ngay</Link>
-            </nav>
+            <Suspense fallback={<nav className="nav" aria-label="Điều hướng chính"><Link href="/login">Đăng nhập</Link></nav>}>
+              <AuthNavigation />
+            </Suspense>
           </div>
         </header>
         {children}
