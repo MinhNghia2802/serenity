@@ -19,6 +19,22 @@ const responseSchema = {
   required: ["nlpEmotionScores", "intensity", "reasonShort", "actionSuggestion", "contentTags", "safetyLevel"],
 };
 
+const retryableStatuses = new Set([429, 500, 502, 503, 504]);
+const retryDelaysMs = [400, 900];
+
+export class GeminiRequestError extends Error {
+  constructor(public readonly status: number) {
+    super(status === 429
+      ? "Gemini đang giới hạn số lượt xử lý. Vui lòng thử lại sau ít phút."
+      : "Gemini đang tạm thời quá tải. Nội dung của bạn vẫn được giữ; vui lòng thử lại sau ít phút.");
+    this.name = "GeminiRequestError";
+  }
+}
+
+function wait(milliseconds: number) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
 export async function analyzeWithGemini(input: AnalyzeRequest): Promise<GeminiAnalysis> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return localTextAnalysis(input);
@@ -40,24 +56,35 @@ Trả JSON đúng schema. Các emotion scores phải nằm trong 0..1 và tổng
 reasonShort và actionSuggestion tối đa 280 ký tự. Hành động chỉ kéo dài 1–3 phút.
 Nếu có dấu hiệu tự làm hại/nguy cơ tức thời, safetyLevel phải là elevated hoặc urgent.`;
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-      body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          responseSchema,
-          temperature: 0.25,
-        },
-      }),
-      signal: AbortSignal.timeout(20000),
-    },
-  );
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+  const request = {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+    body: JSON.stringify({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema,
+        temperature: 0.25,
+      },
+    }),
+  };
 
-  if (!response.ok) throw new Error(`Gemini request failed (${response.status})`);
+  let response: Response | null = null;
+  for (let attempt = 0; attempt <= retryDelaysMs.length; attempt += 1) {
+    try {
+      response = await fetch(url, { ...request, signal: AbortSignal.timeout(20000) });
+    } catch {
+      if (attempt === retryDelaysMs.length) throw new GeminiRequestError(503);
+      await wait(retryDelaysMs[attempt]);
+      continue;
+    }
+
+    if (response.ok || !retryableStatuses.has(response.status) || attempt === retryDelaysMs.length) break;
+    await wait(retryDelaysMs[attempt]);
+  }
+
+  if (!response?.ok) throw new GeminiRequestError(response?.status ?? 503);
   const payload = await response.json();
   const text = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!text) throw new Error("Gemini returned an empty response");

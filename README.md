@@ -10,6 +10,7 @@
 - Dashboard, lịch sử, export/xóa dữ liệu local.
 - Admin Console quản lý bộ tranh và bộ câu hỏi.
 - Supabase Auth, schema, RLS, Storage và mã hóa văn bản trước khi lưu.
+- Đăng ký/đăng nhập bằng email và mật khẩu; tên hiển thị được lưu trong hồ sơ.
 - Demo local chạy không cần tài khoản/key.
 
 ## 1. Chạy local ngay
@@ -61,6 +62,8 @@ where id = '<UUID_USER_TRONG_AUTH_USERS>';
 ```
 
 Không đặt secret/service-role key trong biến `NEXT_PUBLIC_*` và không commit `.env.local`. Serenity v1 không cần secret key của Supabase.
+
+Ứng dụng dùng email + mật khẩu. Trong lúc thử nghiệm có thể tắt **Confirm email** tại Authentication → Sign In / Providers → Email. Khi production, bật xác minh email và cấu hình custom SMTP.
 
 ## 3. Kết nối Gemini
 
